@@ -1,4 +1,4 @@
-name: Run Python Tests
+name: Run Tests in Docker
 
 on:
   push:
@@ -6,20 +6,15 @@ on:
       - main
 
 jobs:
-  test:
+  docker-test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+      - name: Build Docker image
+        run: docker build -t my-test-app .
 
-      - name: Install pytest
-        run: pip install pytest
-
-      - name: Run tests
-        run: pytest test_sample.py -v
+      - name: Run tests inside Docker container
+        run: docker run my-test-app
