@@ -1,4 +1,4 @@
-name: Run Tests in Docker
+name: Run Tests with Secrets
 
 on:
   push:
@@ -6,15 +6,34 @@ on:
       - main
 
 jobs:
-  docker-test:
+  test-with-secrets:
     runs-on: ubuntu-latest
+
+    env:
+      APP_ENV: staging
+      APP_URL: https://myapp.com
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Show environment variable
+        run: echo "Running in $APP_ENV environment"
+
+      - name: Use a secret
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          echo "DB Password is set: $DB_PASSWORD"
+          echo "API Key is set: $API_KEY"
+
       - name: Build Docker image
         run: docker build -t my-test-app .
 
-      - name: Run tests inside Docker container
-        run: docker run my-test-app
+      - name: Run tests inside Docker with env vars
+        run: |
+          docker run \
+            -e APP_ENV=$APP_ENV \
+            -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+            my-test-app
